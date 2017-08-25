@@ -1,0 +1,16 @@
+{
+  "name": "robotcop",
+  "version": "1.0.0",
+  "description": "Bot for crime reporting",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon bot.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.17.2",
+    "express": "^4.15.4",
+    "nodemon": "^1.11.0"
+  }
+}
