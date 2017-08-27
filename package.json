@@ -4,7 +4,7 @@
   "description": "Bot for crime reporting",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon bot.js"
+    "start": "nodemon src/bot.js"
   },
   "author": "",
   "license": "ISC",
