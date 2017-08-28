@@ -46,32 +46,35 @@ function receivedMessage(event) {
   var senderId = event.sender.id;
   axios.defaults.headers.post['Ocp-Apim-Subscription-Key'] = process.env.AZURE_KEY;
   axios.defaults.headers.get['Ocp-Apim-Subscription-Key'] = process.env.AZURE_KEY;
-  console.log(event);
-  // axios.post('https://eastus2.api.cognitive.microsoft.com/face/v1.0/detect?returnFaceId=true&returnFaceLandmarks=false', {
-  //   'url': event.message.attachments[0].payload.url
-  // }).then(function(response) {
-  //   axios.post('https://eastus2.api.cognitive.microsoft.com/face/v1.0/identify', {
-  //     'personGroupId': 'person-data',
-  //     'faceIds': [response.data[0].faceId],
-  //     'maxNumOfCandidatesReturned': 1,
-  //     'confidenceThreshold': 0.5
-  //   }).then(function(response) {
-  //     if(response.data[0].candidates.length > 0) {
-  //       axios.get('https://eastus2.api.cognitive.microsoft.com/face/v1.0/persongroups/person-data/persons/'+response.data[0].candidates[0].personId)
-  //            .then(function(response) {
-  //             callSendAPI(senderId, `Hola ${response.data.name}`);
-  //            }).catch(function (error) {
-  //              console.log(error);
-  //            });
-  //     } else {
-  //       callSendAPI(senderId, 'No se encontró un registro con su foto.');
-  //     }
-  //   }).catch(function (error) {
-  //     console.log(error);
-  //   });
-  // }).catch(function (error) {
-  //   console.log(error);
-  // });
+  if(event.message.attachments > 0) {
+    console.log(event);
+    return;
+  }
+  axios.post('https://eastus2.api.cognitive.microsoft.com/face/v1.0/detect?returnFaceId=true&returnFaceLandmarks=false', {
+    'url': event.message.attachments[0].payload.url
+  }).then(function(response) {
+    axios.post('https://eastus2.api.cognitive.microsoft.com/face/v1.0/identify', {
+      'personGroupId': 'person-data',
+      'faceIds': [response.data[0].faceId],
+      'maxNumOfCandidatesReturned': 1,
+      'confidenceThreshold': 0.5
+    }).then(function(response) {
+      if(response.data[0].candidates.length > 0) {
+        axios.get('https://eastus2.api.cognitive.microsoft.com/face/v1.0/persongroups/person-data/persons/'+response.data[0].candidates[0].personId)
+             .then(function(response) {
+              callSendAPI(senderId, `Hola ${response.data.name}`);
+             }).catch(function (error) {
+               console.log(error);
+             });
+      } else {
+        callSendAPI(senderId, 'No se encontró un registro con su foto.');
+      }
+    }).catch(function (error) {
+      console.log(error);
+    });
+  }).catch(function (error) {
+    console.log(error);
+  });
 }
 
 function callSendAPI(recipient_id, message) {
