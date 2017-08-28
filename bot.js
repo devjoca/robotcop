@@ -46,7 +46,7 @@ function receivedMessage(event) {
   var senderId = event.sender.id;
   axios.defaults.headers.post['Ocp-Apim-Subscription-Key'] = process.env.AZURE_KEY;
   axios.defaults.headers.get['Ocp-Apim-Subscription-Key'] = process.env.AZURE_KEY;
-
+  console.log(event);
   // axios.post('https://eastus2.api.cognitive.microsoft.com/face/v1.0/detect?returnFaceId=true&returnFaceLandmarks=false', {
   //   'url': event.message.attachments[0].payload.url
   // }).then(function(response) {
