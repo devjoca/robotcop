@@ -44,7 +44,7 @@ bot.hear('image', (payload, chat) => {
   // Send an attachment
   chat.say({
     attachment: 'image',
-    url: 'http://example.com/image.png'
+    url: 'https://i.ytimg.com/vi/6TkFojsmdpw/hqdefault.jpg'
   });
 });
 
