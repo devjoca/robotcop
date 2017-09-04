@@ -63,10 +63,18 @@ const askForLocation = (convo) => {
 }
 
 const askForDate = (convo) => {
-  convo.ask(`Envíanos una fecha co formato día/mes/año. Por ejemplo el día de hoy es ${moment().format('DD/MM/YYYY')}`, (payload, convo) => {
-      let date = payload.message.text;
-      date = moment(date, 'dd/mm/yyyy');
-      if (moment(date, 'dd/mm/yyyy').isValid()) {
+  convo.ask({
+    text: `Envíanos una fecha co formato día/mes/año. Por ejemplo el día de hoy es ${moment().format('DD/MM/YYYY')}`,
+    quickReplies: ['Hoy', 'Ayer']
+    }, (payload, convo) => {
+      let date_txt = payload.message.text;
+      let date = moment(date_txt, 'dd/mm/yyyy');
+      if (date_txt == 'Hoy') {
+        date = moment();
+      } else if (date_txt == 'Ayer') {
+        date = moment().subtract(1, 'day');
+      }
+      if (date_txt == 'Hoy' || date_txt == 'Ayer' || moment(date_txt, 'dd/mm/yyyy').isValid()) {
         convo.say(`La fecha escogida es ${date.format('LL')}`).then(() => {
           convo.set('date', date.format('X'));
           askForAditionalInformation(convo);
@@ -95,10 +103,12 @@ const sendSummary = (convo) => {
   - Denunciante: ${convo.get('person').name}
   - Fecha: ${date.format('LL')}
   - Información adicional: ${convo.get('aditionalInformation')}
-  - Ubicación: `).then(() => {
+  - Ubicación: `, {typing:true}).then(() => {
     convo.say({
       attachment: 'image',
       url: `https:\/\/maps.googleapis.com\/maps\/api\/staticmap?size=764x400&center=${coordinates.lat},${coordinates.long}&zoom=18&markers=${coordinates.lat},${coordinates.long}`,
+    }, {typing:true}).then(() => {
+      convo.say('Gracias por tu colaboración', {typing:true});
     });
 
     convo.end();
