@@ -21,7 +21,7 @@ bot.hear(['hello', 'hi', /hey( there)?/i], (payload, chat) => {
 });
 
 
-bot.start();
+bot.start(process.env.PORT || 3000);
 
 // function receivedMessage(event) {
 //   var senderId = event.sender.id;
