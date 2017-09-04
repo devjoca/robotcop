@@ -1,5 +1,6 @@
 'use strict';
 const BootBot = require('bootbot');
+const face = require('./services/face');
 require('dotenv').config()
 
 const bot = new BootBot({
@@ -8,47 +9,27 @@ const bot = new BootBot({
   appSecret: process.env.APP_SECET
 });
 
-bot.on('message', (payload, chat) => {
-  const text = payload.message.text;
-  chat.say(`Echo: ${text}`);
-});
-
-bot.hear(['hello', 'hi', /hey( there)?/i], (payload, chat) => {
-  // Send a text message followed by another text message that contains a typing indicator
-  chat.say('Hello, human friend!').then(() => {
-    chat.say('How are you today?', { typing: true });
-  });
-});
-
-bot.hear(['food', 'hungry'], (payload, chat) => {
-  // Send a text message with quick replies
-  chat.say({
-    text: 'What do you want to eat today?',
-    quickReplies: ['Mexican', 'Italian', 'American', 'Argentine']
-  });
-});
-
-bot.hear(['help'], (payload, chat) => {
-  // Send a text message with buttons
-  chat.say({
-    text: 'What do you need help with?',
-    buttons: [
-      { type: 'postback', title: 'Settings', payload: 'HELP_SETTINGS' },
-      { type: 'postback', title: 'FAQ', payload: 'HELP_FAQ' },
-      { type: 'postback', title: 'Talk to a human', payload: 'HELP_HUMAN' }
-    ]
-  });
-});
-
-bot.hear('image', (payload, chat) => {
-  // Send an attachment
-  chat.say({
-    attachment: 'image',
-    url: 'https://i.ytimg.com/vi/6TkFojsmdpw/hqdefault.jpg'
+bot.on('postback:DENUNCIA_CRIMEN', (payload, chat) => {
+  chat.say('Hola, comenzaremos el proceso de la denuncia.', {'typing':true}).then(() => {
+    chat.conversation((convo) => {
+      askForPhoto(convo);
+    });
   });
 });
 
 bot.start(process.env.PORT || 3000);
+
+const askForPhoto = (convo) => {
+  convo.ask('Envíame una foto tuya o de la persona que realizará la denuncia', (payload, convo) => {
+    if(payload.message.attachments) {
+      face.detectFace(payload.message);
+    } else {
+      convo.say('No has enviado una foto.').then(() => {
+        askForPhoto(convo);
+      })
+    }
+  });
+}
 
 // function receivedMessage(event) {
 //   var senderId = event.sender.id;
