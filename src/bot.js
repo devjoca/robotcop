@@ -23,7 +23,8 @@ bot.start(process.env.PORT || 3000);
 
 const askForPhoto = (convo) => {
   convo.ask('Envíame una foto tuya o de la persona que realizará la denuncia', (payload, convo) => {
-    if (payload.message.attachments) {
+    console.log(payload);
+    if (payload.message && payload.message.attachments) {
       face.detectFace(payload.message).then((response) => {
         if (response.data != []) {
           face.identifyPerson(response.data[0].faceId).then((response) => {
