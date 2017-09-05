@@ -2,6 +2,7 @@
 const BootBot = require('bootbot');
 const moment = require('moment');
 const face = require('./services/face');
+const axios = require('axios');
 require('dotenv').config()
 moment.locale('es');
 
@@ -23,7 +24,6 @@ bot.start(process.env.PORT || 3000);
 
 const askForPhoto = (convo) => {
   convo.ask('Envíame una foto tuya o de la persona que realizará la denuncia', (payload, convo) => {
-    console.log(payload);
     if (payload.message && payload.message.attachments) {
       face.detectFace(payload.message).then((response) => {
         if (response.data != []) {
@@ -110,6 +110,17 @@ const sendSummary = (convo) => {
       url: `https:\/\/maps.googleapis.com\/maps\/api\/staticmap?size=764x400&center=${coordinates.lat},${coordinates.long}&zoom=18&markers=${coordinates.lat},${coordinates.long}`,
     }, {typing:true}).then(() => {
       convo.say('Gracias por tu colaboración', {typing:true});
+    });
+
+    axios.post(`${process.env.BACKEND_API}/incidents`, {
+      person_name: convo.get('person').name,
+      person_document_number: convo.get('person').userData,
+      datetime: convo.get('date'),
+      lat: coordinates.lat,
+      long: coordinates.long,
+      aditional_information: convo.get('aditionalInformation')
+    }).catch(function (error) {
+      console.log(error);
     });
 
     convo.end();
