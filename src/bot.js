@@ -20,33 +20,42 @@ bot.on('postback:DENUNCIA_CRIMEN', (payload, chat) => {
   });
 });
 
+bot.on('postback:ATENCION_CRIMEN', (payload, chat) => {
+  chat.conversation((convo) => {
+    askForHelp(convo);
+  });
+});
+
 bot.start(process.env.PORT || 3000);
 
 const askForPhoto = (convo) => {
-  convo.ask('Envíame una foto tuya o de la persona que realizará la denuncia', (payload, convo) => {
-    if (payload.message && payload.message.attachments) {
-      face.detectFace(payload.message).then((response) => {
-        if (response.data != []) {
-          face.identifyPerson(response.data[0].faceId).then((response) => {
-            if (response.data[0].candidates != []) {
-              face.getPersonInformation(response.data[0].candidates[0].personId).then((response) => {
-                convo.say(`Hola, ${response.data.name}.`).then(() => {
-                  convo.set('person', response.data);
-                  askForLocation(convo);
-                });
-              });
-            }
-          });
+  convo.ask('Envíame una foto tuya o de la persona que realizará la denuncia', async (payload, convo) => {
+    try {
+      if (payload.message && payload.message.attachments) {
+        let faceResp = await face.detectFace(payload.message);
+
+        if (faceResp.data != []) {
+          let personResp = await face.identifyPerson(faceResp.data[0].faceId);
+
+          if (personResp.data[0].candidates != []) {
+            let infoResp = await face.getPersonInformation(personResp.data[0].candidates[0].personId);
+
+            await convo.say(`Hola, ${infoResp.data.name}.`, {typing: true});
+            convo.set('person', infoResp.data);
+            askForLocation(convo);
+          }
         } else {
           convo.say('No has enviado una foto con un rostro reconocible.').then(() => {
             askForPhoto(convo);
           });
         }
-      });
-    } else {
-      convo.say('No has enviado una foto.').then(() => {
-        askForPhoto(convo);
-      });
+      } else {
+        convo.say('No has enviado una foto.').then(() => {
+          askForPhoto(convo);
+        });
+      }
+    } catch(error) {
+      console.log(error);
     }
   });
 }
@@ -124,5 +133,25 @@ const sendSummary = (convo) => {
     });
 
     convo.end();
+  });
+}
+
+const askForHelp = (convo) => {
+  convo.ask({
+    text: 'Envíanos la ubicación del hecho sucedido',
+    quickReplies: [{
+        'content_type': 'location'
+      }]
+  },async (payload, convo) => {
+    let coordinates = payload.message.attachments[0].payload.coordinates;
+    try {
+      let stations = await axios.post(`${process.env.BACKEND_API}/stations/near`, {
+        lat: coordinates.lat,
+        long: coordinates.long,
+      });
+      console.log(stations.data);
+    } catch(error) {
+      console.log(error);
+    }
   });
 }
