@@ -2,6 +2,7 @@
 const BootBot = require('bootbot');
 const moment = require('moment');
 const face = require('./services/face');
+const gMaps = require('./services/gmaps');
 const axios = require('axios');
 require('dotenv').config()
 moment.locale('es');
@@ -9,7 +10,7 @@ moment.locale('es');
 const bot = new BootBot({
   accessToken: process.env.PAGE_ACCESS_TOKEN,
   verifyToken: process.env.VERIFY_TOKEN,
-  appSecret: process.env.APP_SECET
+  appSecret: process.env.APP_SECRET
 });
 
 bot.on('postback:DENUNCIA_CRIMEN', (payload, chat) => {
@@ -149,7 +150,19 @@ const askForHelp = (convo) => {
         lat: coordinates.lat,
         long: coordinates.long,
       });
-      console.log(stations.data);
+
+      // let response = await gMaps.getDistanceMatrix(coordinates, stations.data);
+      await convo.say(`Estamos calculando la comisaria mas cercana`, {typing:true});
+
+      let directions = await gMaps.getDirections(coordinates, stations.data[0]);
+
+      let encRoute = directions.data.routes[0].overview_polyline.points;
+
+      convo.say({
+        attachment: 'image',
+        url: `https:\/\/maps.googleapis.com\/maps\/api\/staticmap?size=764x400&zoom=15&path=enc%3A${encRoute}`,
+      }, {typing:true});
+
     } catch(error) {
       console.log(error);
     }
