@@ -213,6 +213,13 @@ const askForLocationHelp = (convo) => {
         url: `https:\/\/maps.googleapis.com\/maps\/api\/staticmap?size=764x400&zoom=15&markers=${stations.data[0].lat},${stations.data[0].long}&path=enc%3A${encRoute}`,
       }, {typing:true});
 
+      await backend.saveCriminalActReport({
+        lat: coordinates.lat,
+        long: coordinates.long,
+        details: convo.get('details'),
+        stationId: stations.data[0].id,
+      });
+
       convo.end();
     } catch(error) {
       convo.say(`Tuvimos un incoveniente, intenta más tarde.`);
