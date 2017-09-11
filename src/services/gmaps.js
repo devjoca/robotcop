@@ -6,5 +6,5 @@ exports.getDistanceMatrix = (origin, end) => {
 }
 
 exports.getDirections = (origin, destination) => {
-  return axios.get(`http://maps.googleapis.com/maps/api/directions/json?origin=${origin.lat},${origin.long}&destination=${destination.lat},${destination.long}&languages=es&key=${process.env.GMAPS_KEY}`);
+  return axios.get(`http://maps.googleapis.com/maps/api/directions/json?origin=${origin.lat},${origin.long}&destination=${destination.lat},${destination.long}&languages=es`);
 }

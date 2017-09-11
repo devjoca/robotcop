@@ -24,7 +24,7 @@ bot.on('postback:DENUNCIA_CRIMEN', (payload, chat) => {
 
 bot.on('postback:ATENCION_CRIMEN', (payload, chat) => {
   chat.conversation((convo) => {
-    askForHelp(convo);
+    askForDetails(convo);
   });
 });
 
@@ -80,7 +80,8 @@ const askForDate = (convo) => {
     quickReplies: ['Hoy', 'Ayer']
     }, (payload, convo) => {
       const date_txt = payload.message.text;
-      const date = moment(date_txt, 'dd/mm/yyyy');
+      let date = moment(date_txt, 'dd/mm/yyyy');
+
       if (date_txt == 'Hoy') {
         date = moment();
       } else if (date_txt == 'Ayer') {
@@ -142,7 +143,6 @@ const sendSummary = (convo) => {
 
     axios.post(`${process.env.BACKEND_API}/incidents`, {
       person_id: convo.get('person').id,
-      person_document_number: convo.get('document'),
       email: convo.get('email'),
       denouncePersonDetails: convo.get('denouncePersonDetails'),
       datetime: convo.get('date'),
@@ -185,7 +185,7 @@ const askForBirthday = (convo) => {
   });
 }
 
-const askForHelp = (convo) => {
+const askForLocationHelp = (convo) => {
   convo.ask({
     text: 'Envíanos la ubicación del hecho sucedido',
     quickReplies: [{
@@ -219,5 +219,12 @@ const askForHelp = (convo) => {
       convo.end();
       console.log(error);
     }
+  });
+}
+
+const askForDetails = (convo) => {
+  convo.ask(`Ingrese los detalles del hecho sucedido`, (payload, convo) => {
+    convo.set('details', payload.message.text);
+    askForLocationHelp(convo);
   });
 }
