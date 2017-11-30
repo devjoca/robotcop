@@ -40,6 +40,13 @@ const askForPhoto = (convo) => {
 
           if (personResp.data[0].candidates.length > 0) {
             const infoResp = await backend.getByFaceId(personResp.data[0].candidates[0].personId);
+
+            if(infoResp.data.dni != convo.get('document'))
+            {
+              convo.say('La información asociada a la foto no coincide con el documento enviado. Intenta de nuevo.').then(() => {
+                askForPhoto(convo);
+              });
+            }
             await convo.say(`Hola, ${infoResp.data.name}.`, {typing: true});
             convo.set('person', infoResp.data);
             askForLocation(convo);
